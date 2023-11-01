@@ -4,6 +4,7 @@ const token = require("./lib/modules/token");
 const register = require("./lib/modules/registerUser");
 const cotacao = require("./lib/cotacao/api/cotacao");
 const info = require("./lib/info/api/info");
+const worldTime = require("./lib/worldTime/api/worldTime")
 
 app.get("/register/:user/:createtoken", (req, res) => {
   const user = req.params.user;
@@ -21,6 +22,7 @@ app.get("/register/:user/:createtoken", (req, res) => {
     }
   }
 });
+
 app.get("/login/:userLogin/:tokenLogin", (req, res) => {
   const userLogin = req.params.userLogin;
   const tokenLogin = req.params.tokenLogin;
@@ -33,7 +35,8 @@ app.get("/login/:userLogin/:tokenLogin", (req, res) => {
     res.send({ error: "User or token incorrect" });
   }
 });
-app.get("/login/:userLogin/:tokenLogin/:pais/:moeda", async (req, res) => {
+
+app.get("/login/:userLogin/:tokenLogin/:pais/:moeda/:location", async (req, res) => {
   const userLogin = req.params.userLogin;
   const tokenLogin = req.params.tokenLogin;
   if (
@@ -42,15 +45,21 @@ app.get("/login/:userLogin/:tokenLogin/:pais/:moeda", async (req, res) => {
   ) {
     const pais = req.params.pais;
     const moeda = req.params.moeda;
+    const location = req.params.location;
+
     const resultCot = await cotacao.cotGenerate(moeda).then((e) => {
       return e;
     });
     const resultInfo = await info.infoGenerate(pais).then((e) => {
       return e;
     });
+    const resultTime = await worldTime.timeGenerate(location).then((e) => {
+      return e;
+    });
     const juncao = {
       Informacoes: resultInfo,
       Cotacao: resultCot,
+      Time: resultTime,
     };
     res.json(juncao);
   } else {
