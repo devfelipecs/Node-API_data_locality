@@ -33,22 +33,7 @@ app.get("/login/:userLogin/:tokenLogin", (req, res) => {
     res.send({ error: "User or token incorrect" });
   }
 });
-app.get("/login/:userLogin/:tokenLogin/cotacao/:moeda", (req, res) => {
-  const userLogin = req.params.userLogin;
-  const tokenLogin = req.params.tokenLogin;
-  if (
-    userLogin == register.registerUser.user &&
-    tokenLogin == register.registerUser.token
-  ) {
-    const moeda = req.params.moeda;
-    cotacao.cotGenerate(moeda).then((e) => {
-      res.json(e);
-    });
-  } else {
-    res.send({ error: "User or token incorrect" });
-  }
-});
-app.get("/login/:userLogin/:tokenLogin/informacoes/:pais", (req, res) => {
+app.get("/login/:userLogin/:tokenLogin/:pais/:moeda", async (req, res) => {
   const userLogin = req.params.userLogin;
   const tokenLogin = req.params.tokenLogin;
   if (
@@ -56,11 +41,20 @@ app.get("/login/:userLogin/:tokenLogin/informacoes/:pais", (req, res) => {
     tokenLogin == register.registerUser.token
   ) {
     const pais = req.params.pais;
-    info.infoGenerate(pais).then((e) => {
-      res.json(e);
+    const moeda = req.params.moeda;
+    const resultCot = await cotacao.cotGenerate(moeda).then((e) => {
+      return e;
     });
+    const resultInfo = await info.infoGenerate(pais).then((e) => {
+      return e;
+    });
+    const juncao = {
+      Informacoes: resultInfo,
+      Cotacao: resultCot,
+    };
+    res.json(juncao);
   } else {
-    res.json({ error: "User or token incorrect" });
+    res.send({ error: "User or token incorrect" });
   }
 });
 app.listen(port, (e) => {
